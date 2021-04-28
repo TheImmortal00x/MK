@@ -1,20 +1,30 @@
 import { createPlayer, createReloadButton, getRandom, showTitle } from './utils.js'
 import { HIT, ATTACK } from './constants.js'
-import { player1, player2 } from './players.js'
+import Player from './players.js'
 import { generateLogs } from './generateLogs.js';
 
 const $arenas = document.querySelector(".arenas")
 const $formFight = document.querySelector('.control')
 
+let player1;
+let player2;
+
 class Game {
 
-    start = () => {
-        window.onload = () => {
-            generateLogs('start', player1, player2);
-        }
-
+    start = async () => {
+        const players = await this.getPlayers()
+        const p1 = players[getRandom(players.length - 1)]
+        const p2 = players[getRandom(players.length - 1)]
+        player1 = new Player({
+            ...p1,
+            player: 1
+        })
+        player2 = new Player({
+            ...p2,
+            player: 2
+        })
+        generateLogs('start', player1, player2);
         this.addPlayers()
-
         this.fight()
     }
 
@@ -22,6 +32,12 @@ class Game {
         $arenas.appendChild(createPlayer(player1))
         $arenas.appendChild(createPlayer(player2))
     }
+
+    getPlayers = async () => {
+        const body = fetch('https://reactmarathon-api.herokuapp.com/api/mk/players').then(res => res.json());
+        return body;
+    }
+
 
     fight = () => {
         $formFight.addEventListener('submit', function (e) {
